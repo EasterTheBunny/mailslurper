@@ -5,20 +5,20 @@
 package jwt
 
 import (
-	"bytes"
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
 	"crypto/sha1"
 	"encoding/base64"
+	"fmt"
 	"io"
 	"time"
 
+	"github.com/dgrijalva/jwt-go"
+	"github.com/pkg/errors"
 	"golang.org/x/crypto/pbkdf2"
 
-	"github.com/dgrijalva/jwt-go"
-	"github.com/mailslurper/mailslurper/pkg/mailslurper"
-	"github.com/pkg/errors"
+	slurperio "github.com/mailslurper/mailslurper/v2/internal/io"
 )
 
 /*
@@ -26,7 +26,7 @@ JWTService provides methods for working with
 JWTs in MailSlurper
 */
 type JWTService struct {
-	Config *mailslurper.Configuration
+	Config *slurperio.Config
 }
 
 /*
@@ -155,6 +155,12 @@ func (s *JWTService) Parse(tokenFromHeader, authSecret string) (*jwt.Token, erro
 		return result, errors.Wrapf(err, "Problem parsing JWT token")
 	}
 
+	// verify that signed token matches parsed token
+	signed, err := result.SignedString([]byte(authSecret))
+	if err != nil || signed != tokenFromHeader {
+		return result, fmt.Errorf("jwt token not properly signed")
+	}
+
 	if err = s.IsTokenValid(result); err != nil {
 		return result, err
 	}
@@ -165,10 +171,10 @@ func (s *JWTService) Parse(tokenFromHeader, authSecret string) (*jwt.Token, erro
 /*
 IsTokenValid returns an error if there are any issues with the
 provided JWT token. Possible issues include:
-	* Missing claims
-	* Invalid token format
-	* Invalid issuer
-	* User doesn't have a corresponding entry in the credentials table
+  - Missing claims
+  - Invalid token format
+  - Invalid issuer
+  - User doesn't have a corresponding entry in the credentials table
 */
 func (s *JWTService) IsTokenValid(token *jwt.Token) error {
 	var claims *Claims
@@ -197,10 +203,4 @@ func (s *JWTService) IsTokenValid(token *jwt.Token) error {
 
 func (s *JWTService) generateAESKey() []byte {
 	return pbkdf2.Key([]byte(s.Config.AuthSecret), []byte(s.Config.AuthSalt), 4096, 32, sha1.New)
-}
-
-func (s *JWTService) pkcs5Padding(content []byte) []byte {
-	padding := aes.BlockSize - len(content)%aes.BlockSize
-	padtext := bytes.Repeat([]byte{byte(padding)}, padding)
-	return append(content, padtext...)
 }

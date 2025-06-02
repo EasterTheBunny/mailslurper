@@ -7,9 +7,10 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/mailslurper/mailslurper/pkg/auth/basicauth"
+	"github.com/mailslurper/mailslurper/v2/pkg/auth/basicauth"
 )
 
+// TODO: add to cobra command list
 func main() {
 	var userName string
 	var password string

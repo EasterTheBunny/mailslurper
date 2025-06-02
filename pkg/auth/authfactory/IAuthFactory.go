@@ -4,7 +4,7 @@
 
 package authfactory
 
-import "github.com/mailslurper/mailslurper/pkg/auth/auth"
+import "github.com/mailslurper/mailslurper/v2/pkg/auth/auth"
 
 /*
 IAuthFactory, when implmented, returns the correction authorization

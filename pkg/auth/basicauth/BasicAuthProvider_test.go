@@ -7,8 +7,8 @@ package basicauth_test
 import (
 	"testing"
 
-	"github.com/mailslurper/mailslurper/pkg/auth/auth"
-	"github.com/mailslurper/mailslurper/pkg/auth/basicauth"
+	"github.com/mailslurper/mailslurper/v2/pkg/auth/auth"
+	"github.com/mailslurper/mailslurper/v2/pkg/auth/basicauth"
 )
 
 func TestLogin(t *testing.T) {

@@ -1,0 +1,13 @@
+with-expecter: True 
+inpackage: False
+filename: "{{.MockName}}.go"
+dir: internal/mocks
+outpkg: mocks
+resolve-type-alias: False
+disable-version-string: True
+issue-845-fix: True
+packages:
+  github.com/mailslurper/mailslurper/v2/internal/handlers:
+    interfaces:
+      MailRemover:
+      MailCounter:

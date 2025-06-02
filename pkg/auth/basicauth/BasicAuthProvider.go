@@ -5,7 +5,7 @@
 package basicauth
 
 import (
-	"github.com/mailslurper/mailslurper/pkg/auth/auth"
+	"github.com/mailslurper/mailslurper/v2/pkg/auth/auth"
 )
 
 /*

@@ -5,10 +5,10 @@
 package authfactory
 
 import (
-	"github.com/mailslurper/mailslurper/pkg/auth/auth"
-	"github.com/mailslurper/mailslurper/pkg/auth/authscheme"
-	"github.com/mailslurper/mailslurper/pkg/auth/basicauth"
-	"github.com/mailslurper/mailslurper/pkg/mailslurper"
+	"github.com/mailslurper/mailslurper/v2/internal/io"
+	"github.com/mailslurper/mailslurper/v2/pkg/auth/auth"
+	"github.com/mailslurper/mailslurper/v2/pkg/auth/authscheme"
+	"github.com/mailslurper/mailslurper/v2/pkg/auth/basicauth"
 )
 
 /*
@@ -16,7 +16,7 @@ AuthFactory returns an Authorization Provider based on
 the provided configuration
 */
 type AuthFactory struct {
-	Config *mailslurper.Configuration
+	Config *io.Config
 }
 
 /*

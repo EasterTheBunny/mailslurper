@@ -1,0 +1,22 @@
+verbose: false
+logFormat: text
+public:
+  address: localhost
+  port: 8085
+  publicURL: ""
+  certificateFile: ""
+  keyFile: ""
+admin:
+  address: localhost
+  port: 8080
+  publicURL: ""
+  certificateFile: ""
+  keyFile: ""
+smtp:
+  address: localhost
+  port: 2500
+database:
+  dialect: "SQLite"
+  database: "./mailslurper.db"
+maxWorkers: 1000
+autoStartBrowser: false
