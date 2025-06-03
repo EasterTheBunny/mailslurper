@@ -15,6 +15,11 @@ import (
 	"github.com/mailslurper/mailslurper/v2/internal/ui"
 )
 
+func init() {
+	httpCmd.Flags().IntVarP(&config.Public.Port, "port", "p", 8080, "port for http service to listen on")
+	httpCmd.Flags().StringVarP(&config.Public.Address, "listen", "l", "127.0.0.1", "ip address to listen on")
+}
+
 var (
 	httpCmd = &cobra.Command{
 		Use:   "http",

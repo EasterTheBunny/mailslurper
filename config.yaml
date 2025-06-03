@@ -1,12 +1,4 @@
-verbose: false
-logFormat: text
 public:
-  address: localhost
-  port: 8085
-  publicURL: ""
-  certificateFile: ""
-  keyFile: ""
-admin:
   address: localhost
   port: 8080
   publicURL: ""
@@ -19,4 +11,3 @@ database:
   dialect: "SQLite"
   database: "./mailslurper.db"
 maxWorkers: 1000
-autoStartBrowser: false
