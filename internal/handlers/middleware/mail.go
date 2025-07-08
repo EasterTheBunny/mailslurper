@@ -5,13 +5,15 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/gofrs/uuid"
+
 	"github.com/mailslurper/mailslurper/v2/internal/handlers/requests"
 	"github.com/mailslurper/mailslurper/v2/internal/handlers/response"
 	"github.com/mailslurper/mailslurper/v2/internal/model"
 )
 
 type MailGetter interface {
-	GetMailByID(string) (*model.MailItem, error)
+	GetMailByID(uuid.UUID) (*model.MailItem, error)
 }
 
 // MailCtx ...
@@ -22,8 +24,8 @@ func MailCtx(
 ) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
-			mailID := pFn(request, requests.MailIDPathParam)
-			if mailID == "" {
+			mailID, err := uuid.FromString(pFn(request, requests.MailIDPathParam))
+			if err != nil {
 				err := fmt.Errorf("%w: mail id", response.ErrNotFound)
 
 				response.RenderOrLog(writer, request, response.HTTPBadRequest(err), logger)
@@ -31,9 +33,7 @@ func MailCtx(
 				return
 			}
 
-			/*
-			 * Retrieve the mail item
-			 */
+			// retrieve the mail item
 			item, err := data.GetMailByID(mailID)
 			if err != nil {
 				err = fmt.Errorf("%w: Problem getting mail item %s", err, mailID)
@@ -51,7 +51,7 @@ func MailCtx(
 }
 
 type MailAttachmentGetter interface {
-	GetAttachment(string, string) (*model.Attachment, error)
+	GetAttachment(uuid.UUID, uuid.UUID) (*model.Attachment, error)
 }
 
 // MailAttachmentCtx ...
@@ -69,8 +69,8 @@ func MailAttachmentCtx(
 				return
 			}
 
-			attachmentID := pFn(request, requests.MailAttachmentIDPathParam)
-			if attachmentID == "" {
+			attachmentID, err := uuid.FromString(pFn(request, requests.MailAttachmentIDPathParam))
+			if err != nil {
 				err := fmt.Errorf("%w: attachment id", response.ErrNotFound)
 
 				response.RenderOrLog(writer, request, response.HTTPBadRequest(err), logger)
@@ -78,9 +78,7 @@ func MailAttachmentCtx(
 				return
 			}
 
-			/*
-			 * Retrieve the mail itme attachment
-			 */
+			// retrieve the mail item attachment
 			item, err := data.GetAttachment(mailItem.ID, attachmentID)
 			if err != nil {
 				err = fmt.Errorf("%w: Problem getting mail item attachment %s", err, attachmentID)

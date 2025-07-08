@@ -6,24 +6,20 @@ package model
 
 import (
 	"strings"
+
+	"github.com/gobuffalo/pop/v6/slices"
 )
 
-/*
-MailAddressCollection is a set of email address
-*/
-type MailAddressCollection []string
+// MailAddressCollection is a set of email address.
+type MailAddressCollection slices.String
 
-/*
-NewMailAddressCollection returns a new MailAddressCollection
-*/
+// NewMailAddressCollection returns a new MailAddressCollection.
 func NewMailAddressCollection() MailAddressCollection {
 	return make(MailAddressCollection, 0, 5)
 }
 
-/*
-NewMailAddressCollectionFromStringList takes a list of delimited email address and
-breaks it into a collection of mail addresses
-*/
+// NewMailAddressCollectionFromStringList takes a list of delimited email address and breaks it into a collection of
+// mail addresses.
 func NewMailAddressCollectionFromStringList(addresses string) MailAddressCollection {
 	split := strings.Split(addresses, "; ")
 	result := NewMailAddressCollection()

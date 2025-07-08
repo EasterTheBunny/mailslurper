@@ -136,7 +136,7 @@ func (e *DataCommandExecutor) addAttachment(messagePart model.ISMTPMessagePart, 
 
 	e.logger.Debug(fmt.Sprintf("Adding attachment: %v", headers))
 
-	attachment := model.NewAttachment(headers, messagePart.GetBody())
+	attachment := model.NewAttachment(headers, messagePart.GetBody(), e.xssService)
 
 	if e.messagePartIsAttachment(messagePart) {
 		mailItem.Attachments = append(mailItem.Attachments, attachment)

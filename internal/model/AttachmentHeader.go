@@ -9,19 +9,17 @@ import (
 	"strings"
 )
 
-/*
-AttachmentHeader provides information that describes an attachment. It has information
-such as the type of content, file name, etc...
-*/
+// AttachmentHeader provides information that describes an attachment. It has information such as the type of content,
+// file name, etc...
 type AttachmentHeader struct {
-	ContentType             string `json:"contentType"`
-	MIMEVersion             string `json:"mimeVersion"`
-	ContentTransferEncoding string `json:"contentTransferEncoding"`
-	ContentDisposition      string `json:"contentDisposition"`
-	FileName                string `json:"fileName"`
-	Body                    string `json:"body"`
+	ContentType             string `db:"contentType" json:"contentType"`
+	MIMEVersion             string `db:"mimeVersion" json:"mimeVersion"`
+	ContentTransferEncoding string `db:"contentTransferEncoding" json:"contentTransferEncoding"`
+	ContentDisposition      string `db:"contentDisposition" json:"contentDisposition"`
+	FileName                string `db:"fileName" json:"fileName"`
+	Body                    string `db:"body" json:"body"`
 
-	Logger *slog.Logger
+	Logger *slog.Logger `db:"-" json:"-"`
 }
 
 /*

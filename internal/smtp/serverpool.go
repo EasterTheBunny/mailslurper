@@ -30,8 +30,7 @@ func (pool *ServerPool) JoinQueue(worker *Worker) {
 
 // NewServerPool creates a new server pool with a maximum number of SMTP workers. An array of workers is initialized
 // with an ID and an initial state of SMTP_WORKER_IDLE.
-func NewServerPool(logger *slog.Logger, maxWorkers int) *ServerPool {
-	xssService := sanitizer.NewXSSService()
+func NewServerPool(maxWorkers int, xss sanitizer.IXSSServiceProvider, logger *slog.Logger) *ServerPool {
 	emailValidationService := mailslurper.NewEmailValidationService()
 
 	pool := &ServerPool{
@@ -44,7 +43,7 @@ func NewServerPool(logger *slog.Logger, maxWorkers int) *ServerPool {
 			idx+1,
 			pool,
 			emailValidationService,
-			xssService,
+			xss,
 			logger.With("who", fmt.Sprintf("SMTP Worker %d", idx+1)),
 		))
 	}

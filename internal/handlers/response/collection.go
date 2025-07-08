@@ -12,9 +12,9 @@ import (
 
 // MailCollectionResponse is sent in response to getting a collection of mail items.
 type MailCollectionResponse struct {
-	MailItems    []*model.MailItem `json:"mailItems"`
-	TotalPages   int               `json:"totalPages"`
-	TotalRecords int               `json:"totalRecords"`
+	MailItems    []model.MailItem `json:"mailItems"`
+	TotalPages   int              `json:"totalPages"`
+	TotalRecords int              `json:"totalRecords"`
 }
 
 // Render implements the render.Renderer interface for use with chi-router.

@@ -1,0 +1,12 @@
+create_table("mailitem") {
+    t.Column("id", "uuid", {primary: true})
+    t.Column("dateSent", "string", {})
+    t.Column("fromAddress", "string", {})
+    t.Column("toAddress", "string", {})
+    t.Column("subject", "string", {})
+    t.Column("xmailer", "string", {})
+    t.Column("body", "text", {})
+    t.Column("contentType", "string", {})
+    t.Column("boundary", "string", {})
+    t.Timestamps()
+}

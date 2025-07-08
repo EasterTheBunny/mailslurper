@@ -24,4 +24,4 @@ COPY config.yaml ~/.config/mailslurper/config.yaml
 COPY --from=builder /go/src/bin/mailslurper /go/bin/mailslurper
 
 ENV PATH="/go/bin:${PATH}"
-ENTRYPOINT ["mailslurper all"]
+ENTRYPOINT ["mailslurper"]

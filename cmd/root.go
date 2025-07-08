@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 	"log"
-	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
@@ -11,7 +10,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"github.com/mailslurper/mailslurper/v2/internal/app"
 	"github.com/mailslurper/mailslurper/v2/internal/io"
 )
 
@@ -37,7 +35,7 @@ var (
 	config                    io.Config
 
 	// TODO: do not use global variables for dependencies
-	database app.IStorage
+	// database app.IStorage
 
 	rootCmd = &cobra.Command{
 		Short: "Run the mailslurper service.",
@@ -96,18 +94,4 @@ func bindFlags(vpr *viper.Viper, cmd *cobra.Command) {
 	vpr.BindPFlag("log-format", cmd.Flags().Lookup("log-format"))
 	vpr.BindPFlag("public.address", cmd.Flags().Lookup("public.address"))
 	vpr.BindPFlag("public.port", cmd.Flags().Lookup("public.port"))
-}
-
-func setupDatabase(logger *slog.Logger) {
-	var err error
-
-	/*
-	 * Setup global database connection handle
-	 */
-	storageType, databaseConnection := config.GetDatabaseConfiguration()
-
-	if database, err = app.ConnectToStorage(storageType, databaseConnection, logger); err != nil {
-		logger.Error("Error connecting to storage type with a connection string", "type", int(storageType), "connection", databaseConnection.String())
-		cobra.CheckErr(err)
-	}
 }

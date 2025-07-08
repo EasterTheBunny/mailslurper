@@ -9,6 +9,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/gofrs/uuid"
+
 	"github.com/mailslurper/mailslurper/v2/internal/handlers/middleware"
 	"github.com/mailslurper/mailslurper/v2/internal/handlers/requests"
 	"github.com/mailslurper/mailslurper/v2/internal/handlers/response"
@@ -18,11 +20,11 @@ import (
 
 type MailCollectionGetter interface {
 	MailCounter
-	GetMailCollection(int, int, *persistence.MailSearch) ([]*model.MailItem, error)
+	GetMailCollection(int, int, *persistence.MailSearch) ([]model.MailItem, error)
 }
 
 type MailMessageRawGetter interface {
-	GetMailMessageRawByID(string) (string, error)
+	GetMailMessageRawByID(uuid.UUID) (string, error)
 }
 
 type GetMailCollectionParams struct {
@@ -54,7 +56,7 @@ func GetMailCollection(
 		}
 
 		var pageNumber int
-		var mailCollection []*model.MailItem
+		var mailCollection []model.MailItem
 		var totalRecordCount int
 
 		/*

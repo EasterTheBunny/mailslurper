@@ -1,0 +1,8 @@
+create_table("attachment") {
+    t.Column("id", "uuid", {primary: true})
+    t.ForeignKey("mailItemId", {"mailitem": ["id"]}, {"on_delete": "cascade"})
+    t.Column("fileName", "string", {})
+    t.Column("contentType", "string", {})
+    t.Column("content", "string", {})
+    t.Timestamps()
+}

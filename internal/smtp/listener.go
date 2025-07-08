@@ -100,14 +100,18 @@ func (l *Listener) Shutdown(_ context.Context) error {
 	close(l.chClose)
 	l.running.Store(false)
 
-	return nil
+	return l.listener.Close()
 }
 
 func (l *Listener) Close() error {
 	close(l.chClose)
 	l.running.Store(false)
 
-	return nil
+	return l.listener.Close()
+}
+
+func (l *Listener) Addr() net.Addr {
+	return l.listener.Addr()
 }
 
 func (l *Listener) openListener() error {
@@ -151,7 +155,7 @@ func (l *Listener) startReceivers() {
 		case <-l.chClose:
 			l.logger.Info("Shutting down receiver channel...")
 
-			break
+			return
 		}
 	}
 }
@@ -160,15 +164,17 @@ func (l *Listener) acceptConnections() {
 	for {
 		select {
 		case <-l.chClose:
-			break
+			return
 		default:
 			connection, err := l.listener.Accept()
 			if err != nil {
 				l.logger.With("error", err).Error("Problem accepting SMTP requests")
-				close(l.chClose)
-				l.running.Store(false)
+				if l.running.Load() {
+					close(l.chClose)
+					l.running.Store(false)
+				}
 
-				break
+				return
 			}
 
 			if err = l.connectionManager.New(connection); err != nil {

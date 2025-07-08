@@ -11,3 +11,7 @@ packages:
     interfaces:
       MailRemover:
       MailCounter:
+  github.com/mailslurper/mailslurper/v2/internal/app:
+    interfaces:
+      MailWriter:
+      Persistance:

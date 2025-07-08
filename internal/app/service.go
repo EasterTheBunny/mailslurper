@@ -4,9 +4,11 @@ import (
 	"context"
 	"crypto/tls"
 	"log/slog"
+	"net"
 	"net/http"
 	"time"
 
+	"github.com/adampresley/webframework/sanitizer"
 	"github.com/easterthebunny/service"
 	"github.com/spf13/cobra"
 
@@ -100,9 +102,9 @@ func (s *HTTPService) Close() error {
 var _ service.Runnable = (*SMTPService)(nil)
 
 type SMTPService struct {
-	config   *io.Config
-	database IStorage
-	logger   *slog.Logger
+	config *io.Config
+	orm    MailWriter
+	logger *slog.Logger
 
 	// internal state
 	chMail   chan *model.MailItem
@@ -111,25 +113,29 @@ type SMTPService struct {
 	chClose  chan struct{}
 }
 
-func NewSMTPService(config *io.Config, logger *slog.Logger) *SMTPService {
+func NewSMTPService(
+	config *io.Config,
+	xss sanitizer.IXSSServiceProvider,
+	db MailWriter,
+	logger *slog.Logger,
+) *SMTPService {
 	return &SMTPService{
+		config:  config,
+		orm:     db,
+		logger:  logger,
 		chMail:  make(chan *model.MailItem, 1_000),
-		pool:    smtp.NewServerPool(logger.With("who", "SMTP Server Pool"), config.MaxWorkers),
+		pool:    smtp.NewServerPool(config.MaxWorkers, xss, logger.With("who", "SMTP Server Pool")),
 		chClose: make(chan struct{}),
 	}
 }
 
 func (s *SMTPService) Start() error {
-	/*
-	 * Setup receivers (subscribers) to handle new mail items.
-	 */
+	// setup receivers (subscribers) to handle new mail items.
 	receivers := []mailslurper.IMailItemReceiver{
-		NewDatabaseReceiver(s.database, s.logger.With("who", "Database Receiver")),
+		NewDatabaseReceiver(s.orm, s.logger.With("who", "Database Receiver")),
 	}
 
-	/*
-	 * Setup the SMTP listener
-	 */
+	// setup the SMTP listener
 	smtpListener, err := smtp.NewListener(
 		s.logger.With("who", "SMTP Listener"),
 		s.config.SMTP,
@@ -157,5 +163,9 @@ func (s *SMTPService) Shutdown(ctx context.Context) error {
 func (s *SMTPService) Close() error {
 	close(s.chClose)
 
-	return s.Close()
+	return s.listener.Close()
+}
+
+func (s *SMTPService) Addr() net.Addr {
+	return s.listener.Addr()
 }

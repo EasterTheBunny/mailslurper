@@ -6,12 +6,14 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/adampresley/webframework/sanitizer"
 	"github.com/easterthebunny/service"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
 	"github.com/mailslurper/mailslurper/v2/internal/app"
 	"github.com/mailslurper/mailslurper/v2/internal/io"
+	"github.com/mailslurper/mailslurper/v2/internal/persistence"
 )
 
 func init() {
@@ -39,9 +41,12 @@ var (
 			}
 
 			logger := io.NewLogger(cmd.OutOrStdout(), io.LogFormat(logFormat), logLevel)
+			xss := sanitizer.NewXSSService()
 
 			logger.Debug("Starting MailSlurper SMTP Service", "version", "v"+cmd.Version)
-			setupDatabase(logger)
+			// TODO: finish config
+			orm, err := persistence.NewORM(persistence.Config{}, xss, logger)
+			cobra.CheckErr(err)
 
 			mgr := service.NewRecoverableServiceManager(
 				service.WithRecoverWait(5*time.Second),
@@ -49,7 +54,7 @@ var (
 				service.RecoverOnError,
 			)
 
-			cobra.CheckErr(mgr.Add(app.NewSMTPService(&config, logger)))
+			cobra.CheckErr(mgr.Add(app.NewSMTPService(&config, xss, orm, logger)))
 
 			ctx, cancel := signal.NotifyContext(cmd.Context(), syscall.SIGINT, syscall.SIGTERM)
 			defer cancel()

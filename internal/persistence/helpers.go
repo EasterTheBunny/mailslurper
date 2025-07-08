@@ -10,6 +10,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gobuffalo/pop/v6"
+	"github.com/gofrs/uuid"
+
 	"github.com/mailslurper/mailslurper/v2/internal/model"
 )
 
@@ -141,6 +144,42 @@ func addOrderBy(sqlQuery string, tablePrefix string, mailSearch *MailSearch) str
 	return sqlQuery
 }
 
+func addQuery(db *pop.Connection, mailSearch *MailSearch) *pop.Connection {
+	if mailSearch == nil {
+		return db
+	}
+
+	if len(strings.TrimSpace(mailSearch.Message)) > 0 {
+		db.Where(
+			`(mailitem.body LIKE ? OR mailitem.subject LIKE ?)`,
+			"%"+mailSearch.Message+"%",
+			"%"+mailSearch.Message+"%",
+		)
+	}
+
+	if len(strings.TrimSpace(mailSearch.From)) > 0 {
+		db.Where(`mailitem.fromAddress LIKE ?`, "%"+mailSearch.From+"%")
+	}
+
+	if len(strings.TrimSpace(mailSearch.To)) > 0 {
+		db.Where(`mailitem.toAddressList LIKE ?`, "%"+mailSearch.To+"%")
+	}
+
+	if len(strings.TrimSpace(mailSearch.Start)) > 0 {
+		if date, err := time.Parse("2006-01-02", mailSearch.Start); err == nil {
+			db.Where(`mailitem.dateSent >= ?`, date)
+		}
+	}
+
+	if len(strings.TrimSpace(mailSearch.End)) > 0 {
+		if date, err := time.Parse("2006-01-02", mailSearch.End); err == nil {
+			db.Where(`mailitem.dateSent < ?`, date.Add(time.Hour*24))
+		}
+	}
+
+	return db
+}
+
 func addSearchCriteria(sqlQuery string, parameters []interface{}, mailSearch *MailSearch) (string, []interface{}) {
 	var date time.Time
 	var err error
@@ -200,10 +239,10 @@ func addSearchCriteria(sqlQuery string, parameters []interface{}, mailSearch *Ma
 
 func storeAttachments(mailItemID string, transaction *sql.Tx, attachments []*model.Attachment) error {
 	var err error
-	var attachmentID string
+	var attachmentID uuid.UUID
 
 	for _, currentAttachment := range attachments {
-		if attachmentID, err = model.GenerateID(); err != nil {
+		if attachmentID, err = uuid.NewV4(); err != nil {
 			return fmt.Errorf("Error generating ID for attachment: %s", err.Error())
 		}
 
