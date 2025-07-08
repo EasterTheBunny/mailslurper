@@ -9,8 +9,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 
+	"github.com/mailslurper/mailslurper/v2/internal/persistence"
 	"github.com/mailslurper/mailslurper/v2/pkg/auth/authscheme"
 )
 
@@ -36,11 +36,11 @@ var (
 
 // Config contains settings for how to bind servers and connect to databases.
 type Config struct {
-	Public     ListenConfig   `mapstructure:"public"`
-	SMTP       ListenConfig   `mapstructure:"smtp"`
-	Database   DatabaseConfig `mapstructure:"database"`
-	MaxWorkers int            `mapstructure:"maxWorkers"`
-	Theme      string         `mapstructure:"theme"`
+	Public     ListenConfig       `mapstructure:"public"`
+	SMTP       ListenConfig       `mapstructure:"smtp"`
+	Database   persistence.Config `mapstructure:"database"`
+	MaxWorkers int                `mapstructure:"maxWorkers"`
+	Theme      string             `mapstructure:"theme"`
 
 	AuthSecret           string            `mapstructure:"authSecret"`
 	AuthSalt             string            `mapstructure:"authSalt"`
@@ -48,27 +48,8 @@ type Config struct {
 	AuthTimeoutInMinutes int               `mapstructure:"authTimeoutInMinutes"`
 	Credentials          map[string]string `mapstructure:"credentials"`
 
-	StorageType StorageType `json:"-"`
-
 	// WriterFunc allows the config to be persisted.
 	WriterFunc func() error `mapstructure:"-"`
-}
-
-// GetDatabaseConfiguration returns a pointer to a DatabaseConnection structure with data pulled from a Configuration structure.
-func (c *Config) GetDatabaseConfiguration() (StorageType, *ConnectionInformation) {
-	connectionInformation := NewConnectionInformation(c.Database.Host, c.Database.Port)
-	connectionInformation.SetDatabaseInformation(c.Database.Name, c.Database.UserName, c.Database.Password)
-
-	if strings.ToLower(c.Database.Dialect) == "sqlite" {
-		connectionInformation.SetDatabaseFile(c.Database.Name)
-	}
-
-	result, err := GetDatabaseEngineFromName(c.Database.Dialect)
-	if err != nil {
-		panic("Unable to determine database engine")
-	}
-
-	return result, connectionInformation
 }
 
 func (c *Config) GetTheme() string {
@@ -136,34 +117,6 @@ func (c ListenConfig) isValidFile(filename string) bool {
 	return true
 }
 
-type DatabaseConfig struct {
-	URL      string `mapstructure:"url"`
-	Dialect  string `mapstructure:"dialect"`
-	Host     string `mapstructure:"host"`
-	Port     int    `mapstructure:"port"`
-	Name     string `mapstructure:"database"`
-	UserName string `mapstructure:"userName"`
-	Password string `mapstructure:"password"`
-}
-
-func (config DatabaseConfig) Validate() error {
-	if !IsValidStorageType(config.Dialect) {
-		return ErrInvalidDatabaseDialect
-	}
-
-	if NeedDBHost(config.Dialect) {
-		if config.Host == "" {
-			return ErrInvalidDatabaseHost
-		}
-	}
-
-	if config.Name == "" {
-		return ErrInvalidDatabaseName
-	}
-
-	return nil
-}
-
 func (config Config) Validate() error {
 	if config.Public.Address == "" {
 		return ErrInvalidPublicAddress
@@ -174,10 +127,6 @@ func (config Config) Validate() error {
 	}
 
 	if err := config.Public.Validate(); err != nil {
-		return err
-	}
-
-	if err := config.Database.Validate(); err != nil {
 		return err
 	}
 

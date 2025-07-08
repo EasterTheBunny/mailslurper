@@ -48,8 +48,7 @@ var (
 				service.RecoverOnError,
 			)
 
-			// TODO: finish config
-			orm, err := persistence.NewORM(persistence.Config{}, xss, logger)
+			orm, err := persistence.NewORM(config.Database, xss, logger)
 			cobra.CheckErr(err)
 
 			appConfig := &app.HTTPServiceConfig{

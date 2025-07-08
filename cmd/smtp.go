@@ -44,8 +44,7 @@ var (
 			xss := sanitizer.NewXSSService()
 
 			logger.Debug("Starting MailSlurper SMTP Service", "version", "v"+cmd.Version)
-			// TODO: finish config
-			orm, err := persistence.NewORM(persistence.Config{}, xss, logger)
+			orm, err := persistence.NewORM(config.Database, xss, logger)
 			cobra.CheckErr(err)
 
 			mgr := service.NewRecoverableServiceManager(
